@@ -1,0 +1,83 @@
+# ==============================================================================
+# 1. FLUTTER, DART & PUB
+# ==============================================================================
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Flutter symbols, coverage & obfuscation maps
+app.*.symbols
+app.*.map.json
+/coverage/
+
+# Environment configs (if using flutter_dotenv or local env files)
+.env
+.env.*
+!.env.example
+
+# ==============================================================================
+# 2. ANDROID
+# ==============================================================================
+/android/.gradle/
+/android/captures/
+/android/gradlew
+/android/gradlew.bat
+/android/local.properties
+/android/GeneratedPluginRegistrant.java
+
+# Android signing keys (CRITICAL: Never commit signing keys)
+/android/key.properties
+*.jks
+*.keystore
+
+# ==============================================================================
+# 3. iOS & macOS
+# ==============================================================================
+/ios/Pods/
+/ios/.symlinks/
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Flutter.podspec
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/ephemeral/
+/ios/Runner/GeneratedPluginRegistrant.*
+/macos/Flutter/ephemeral/
+/macos/Pods/
+
+*.mode1v3
+*.mode2v3
+*.moved-aside
+*.pbxuser
+*.perspectivev3
+**/DerivedData/
+
+# ==============================================================================
+# 4. WEB & DESKTOP (LINUX / WINDOWS)
+# ==============================================================================
+/linux/flutter/ephemeral/
+/windows/flutter/ephemeral/
+
+# ==============================================================================
+# 5. IDEs, EDITORS & OS FILES
+# ==============================================================================
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+*~
+*.swp
+*.swo

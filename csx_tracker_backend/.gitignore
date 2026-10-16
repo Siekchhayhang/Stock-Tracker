@@ -1,0 +1,73 @@
+# ==============================================================================
+# 1. SECRETS & ENVIRONMENT VARIABLES
+# ==============================================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+
+# ==============================================================================
+# 2. PYTHON & FASTAPI
+# ==============================================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging & distribution
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing, Linting & Type Checking caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Logs & runtime files
+*.log
+*.pid
+celerybeat-schedule
+
+# ==============================================================================
+# 3. POSTGRESQL & LOCAL DATA VOLUMES
+# ==============================================================================
+postgres_data/
+pgdata/
+*.dump
+*.sql.gz
+*.db
+*.sqlite3
+
+# ==============================================================================
+# 4. IDEs, EDITORS & OS FILES
+# ==============================================================================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+*~
+*.swp
+*.swo
