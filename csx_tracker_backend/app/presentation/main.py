@@ -6,7 +6,11 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.infrastructure.repositories.postgres_repo import AsyncSessionLocal, PostgresPositionRepo
+from app.infrastructure.repositories.postgres_repo import (
+    AsyncSessionLocal,
+    PostgresPositionRepo,
+    init_db,
+)
 from app.presentation.dependencies import get_market_provider, get_alert_observers
 from app.application.ingest_market_prices import IngestMarketPricesUseCase
 from app.presentation.routers import portfolio_api, telegram_webhook
@@ -38,7 +42,7 @@ async def scheduled_csx_ingestion_job() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Poll CSX every 15 seconds (respects MEF DataEF 24 req/min rate limit)
+    await init_db()
     scheduler.add_job(scheduled_csx_ingestion_job, "interval", seconds=15)
     scheduler.start()
     yield

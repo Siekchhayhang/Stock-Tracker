@@ -19,7 +19,7 @@ class MEFDataEFClient:
 
     async def fetch_latest_ticks(self) -> dict[str, StockTick]:
         headers = {"User-Agent": "CSXProfitTracker/2.0"}
-        async with httpx.AsyncClient(timeout=8.0, headers=headers) as client:
+        async with httpx.AsyncClient(timeout=12.0, headers=headers, verify=False) as client:
             resp = await client.get(self.SUMMARY_URL)
             resp.raise_for_status()
             payload = resp.json()

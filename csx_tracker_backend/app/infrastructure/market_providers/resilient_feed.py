@@ -20,7 +20,7 @@ class ResilientMarketFeed:
                     return ticks
             except Exception as exc:
                 logger.warning(
-                    "Market provider %s failed (%s); falling back to next provider.",
+                    "Market provider %s failed (%r); falling back to next provider.",
                     provider.__class__.__name__,
                     exc,
                 )

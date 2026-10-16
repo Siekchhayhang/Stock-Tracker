@@ -2,11 +2,15 @@
 import os
 from decimal import Decimal
 from typing import Optional
+from dotenv import load_dotenv
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from app.domain.entities import StockTick, Position, ExitAlert
 from app.domain.policies import BrokerFeePolicy
 from app.domain.strategies import StrategyFactory
+
+# Load environment variables from .env
+load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql+asyncpg://postgres:password@localhost:5432/csx_tracker"
@@ -14,6 +18,74 @@ DATABASE_URL = os.getenv(
 
 engine = create_async_engine(DATABASE_URL, pool_pre_ping=True)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+
+
+async def init_db() -> None:
+    """Automatically creates tables and seeds default CSX broker profile (id=1) on startup."""
+    async with engine.begin() as conn:
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS broker_profiles (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                buy_fee_rate NUMERIC(6, 5) NOT NULL DEFAULT 0.00500,
+                sell_fee_rate NUMERIC(6, 5) NOT NULL DEFAULT 0.00500,
+                min_fee_khr BIGINT NOT NULL DEFAULT 0
+            );
+        """))
+        await conn.execute(text("""
+            INSERT INTO broker_profiles (id, name, buy_fee_rate, sell_fee_rate, min_fee_khr)
+            VALUES (1, 'Default CSX Broker (0.50%)', 0.00500, 0.00500, 0)
+            ON CONFLICT (id) DO NOTHING;
+        """))
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS stocks (
+                ticker VARCHAR(10) PRIMARY KEY,
+                company_name VARCHAR(150) NOT NULL,
+                board VARCHAR(20) DEFAULT 'MAIN',
+                last_price_khr BIGINT NOT NULL DEFAULT 0,
+                base_price_khr BIGINT NOT NULL DEFAULT 0,
+                best_bid_khr BIGINT DEFAULT 0,
+                best_bid_volume BIGINT DEFAULT 0,
+                daily_fx_khr_usd NUMERIC(8, 2) DEFAULT 4065.00,
+                updated_at TIMESTAMPTZ DEFAULT NOW()
+            );
+        """))
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS positions (
+                id SERIAL PRIMARY KEY,
+                user_id INT NOT NULL,
+                telegram_chat_id BIGINT NOT NULL,
+                ticker VARCHAR(10) REFERENCES stocks(ticker),
+                broker_id INT REFERENCES broker_profiles(id) DEFAULT 1,
+                total_shares BIGINT NOT NULL DEFAULT 0,
+                total_cost_khr NUMERIC(18, 2) NOT NULL DEFAULT 0,
+                avg_cost_per_share_khr NUMERIC(14, 2) NOT NULL DEFAULT 0,
+                breakeven_price_khr BIGINT NOT NULL DEFAULT 0,
+                UNIQUE(user_id, ticker, broker_id)
+            );
+        """))
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS transactions (
+                id SERIAL PRIMARY KEY,
+                position_id INT REFERENCES positions(id) ON DELETE CASCADE,
+                side VARCHAR(4) CHECK (side IN ('BUY', 'SELL')),
+                shares BIGINT NOT NULL CHECK (shares > 0),
+                price_khr BIGINT NOT NULL CHECK (price_khr > 0),
+                fee_khr NUMERIC(14, 2) NOT NULL,
+                executed_at TIMESTAMPTZ DEFAULT NOW()
+            );
+        """))
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS exit_alerts (
+                id SERIAL PRIMARY KEY,
+                position_id INT REFERENCES positions(id) ON DELETE CASCADE,
+                trigger_type VARCHAR(25) NOT NULL,
+                target_value NUMERIC(14, 2) NOT NULL,
+                target_exec_price_khr BIGINT NOT NULL,
+                is_active BOOLEAN DEFAULT TRUE,
+                last_triggered_at TIMESTAMPTZ
+            );
+        """))
 
 
 class PostgresPositionRepo:
@@ -187,11 +259,10 @@ class PostgresPositionRepo:
     async def save_position_and_transaction(
         self, position: Position, side: str, shares: int, price_khr: int, fee_khr: Decimal
     ) -> Position:
-        # Ensure stock exists in `stocks` table
         await self._db.execute(
             text("""
-                INSERT INTO stocks (ticker, company_name, last_price_khr)
-                VALUES (:t, :t, :p) ON CONFLICT (ticker) DO NOTHING
+                INSERT INTO stocks (ticker, company_name, last_price_khr, best_bid_khr)
+                VALUES (:t, :t, :p, :p) ON CONFLICT (ticker) DO NOTHING
             """),
             {"t": position.ticker, "p": price_khr},
         )

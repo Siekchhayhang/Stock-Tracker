@@ -16,7 +16,7 @@ class CSXHtmlScraper:
 
     async def fetch_latest_ticks(self) -> dict[str, StockTick]:
         headers = {"User-Agent": "Mozilla/5.0 (compatible; CSXProfitTracker/2.0)"}
-        async with httpx.AsyncClient(timeout=10.0, headers=headers) as client:
+        async with httpx.AsyncClient(timeout=15.0, headers=headers, verify=False) as client:
             resp = await client.get(self.CSX_URL)
             resp.raise_for_status()
 
