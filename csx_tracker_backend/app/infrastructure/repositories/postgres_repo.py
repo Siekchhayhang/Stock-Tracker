@@ -10,10 +10,10 @@ from app.domain.policies import BrokerFeePolicy
 from app.domain.strategies import StrategyFactory
 
 # Load environment variables from .env
-load_dotenv()
+load_dotenv(override=True)
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql+asyncpg://postgres:password@localhost:5432/csx_tracker"
+    "DATABASE_URL"
 )
 
 engine = create_async_engine(DATABASE_URL, pool_pre_ping=True)
