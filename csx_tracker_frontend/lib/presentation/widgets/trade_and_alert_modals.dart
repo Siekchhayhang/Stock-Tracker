@@ -66,7 +66,7 @@ class TradeAndAlertModals {
                   const SizedBox(height: 16),
                   if (initialTicker == null)
                     DropdownButtonFormField<String>(
-                      value: selectedTicker,
+                      initialValue: selectedTicker,
                       decoration: const InputDecoration(
                         labelText: 'CSX Stock Ticker',
                         border: OutlineInputBorder(),
@@ -76,8 +76,9 @@ class TradeAndAlertModals {
                               (t) => DropdownMenuItem(value: t, child: Text(t)))
                           .toList(),
                       onChanged: (val) {
-                        if (val != null)
+                        if (val != null) {
                           setModalState(() => selectedTicker = val);
+                        }
                       },
                     ),
                   const SizedBox(height: 12),
@@ -184,7 +185,7 @@ class TradeAndAlertModals {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: triggerType,
+                    initialValue: triggerType,
                     decoration: const InputDecoration(
                       labelText: 'Trigger Strategy',
                       border: OutlineInputBorder(),

@@ -54,8 +54,9 @@ class PositionEntity extends Equatable {
   /// Progress (0.0 to 1.0) from Break-Even toward the primary Exit Target
   double get progressToTarget {
     final target = primaryTargetPriceKhr;
-    if (target == null || target <= breakevenKhr)
+    if (target == null || target <= breakevenKhr) {
       return isProfitable ? 1.0 : 0.0;
+    }
     final progress =
         (executableExitPriceKhr - breakevenKhr) / (target - breakevenKhr);
     return progress.clamp(0.0, 1.0);
